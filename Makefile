@@ -10,10 +10,53 @@ PROG_NAME=Main
 
 
 
-all: $(OBJ)/menus.o $(OBJ)/querys.o $(OBJ)/odbc.o $(OBJ)/main.o
+
+export PGDATABASE:=classicmodels
+export PGUSER :=alumnodb
+export PGPASSWORD :=alumnodb
+export PGCLIENTENCODING:=LATIN9
+export PGHOST:=localhost
+
+
+
+
+DBNAME = classicmodels
+PSQL = psql
+CREATEDB = createdb
+DROPDB = dropdb --if-exists
+PG_DUMP = pg_dump
+PG_RESTORE = pg_restore
+
+
+all: dropdb createdb restore shell
+createdb:
+	@echo Creando BBDD
+	@$(CREATEDB)
+dropdb:
+	@echo Eliminando BBDD
+	@$(DROPDB) $(DBNAME)
+	rm -f *.log
+dump:
+	@echo creando dumpfile
+	@$(PG_DUMP) > $(DBNAME).sql
+restore:
+	@echo restore data base
+	@cat $(DBNAME).sql | $(PSQL)
+psql: shell
+shell:
+	@echo create psql shell
+	@$(PSQL)
+
+
+
+compile: $(OBJ)/menus.o $(OBJ)/querys.o $(OBJ)/odbc.o $(OBJ)/main.o
 	@echo Compilando...
 	gcc -o $(PROG_NAME) $(OBJ)/menus.o $(OBJ)/querys.o $(OBJ)/odbc.o $(OBJ)/main.o $(LDLIBS)
 	@echo Creado ejecutable \"$(PROG_NAME)\"
+	@echo
+
+
+execute: compile
 	@echo
 	@echo Ejecutando...
 	@echo
