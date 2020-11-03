@@ -70,7 +70,7 @@ void query_productStockInterface(SQLHSTMT *stmt, SQLINTEGER *result, SQLCHAR *pr
   }
   if(!a) printf("\n\n < No products with the code \'%s\' found >\n\n",productcode);
 
-  stop();
+  /*stop();*/
 
   return;
 }
@@ -156,7 +156,7 @@ void query_productFindInterface(SQLHSTMT *stmt, SQLCHAR *pcode, SQLCHAR *pname, 
   printf(" < Press ENTER to exit >\n");
 
 
-  stop();
+  /*stop();*/
 
   return;
 }
