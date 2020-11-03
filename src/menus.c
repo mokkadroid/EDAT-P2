@@ -153,14 +153,14 @@ void menus_exit(FILE *out){
 /* Products options */
 int menus_productsStock(SQLHSTMT *stmt, FILE *out){
 
-  printf(" > Introduce un identificador de producto o end para volver ");
+  printf(" > Insert product code ");
   query_productStock(stmt, out);
 
   return 0;
 }
 int menus_productsFind(SQLHSTMT *stmt, FILE *out){
 
-  printf(" > Introduce un nombre de producto ");
+  printf(" > Insert product name ");
   query_productFind(stmt, out);
 
   return 0;
