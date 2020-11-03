@@ -1,5 +1,6 @@
 
 
+
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -51,6 +52,7 @@ void menus_input(char *c){
   (*c) = getchar();
   system("/bin/stty cooked");
   system("stty echo");
+  /*scanf("%c\r",c);*/
 
   return;
 }
@@ -153,14 +155,14 @@ void menus_exit(FILE *out){
 /* Products options */
 int menus_productsStock(SQLHSTMT *stmt, FILE *out){
 
-  printf(" > Insert product code ");
+  printf("\nEnter productcode > ");
   query_productStock(stmt, out);
 
   return 0;
 }
 int menus_productsFind(SQLHSTMT *stmt, FILE *out){
 
-  printf(" > Insert product name ");
+  printf("\nEnter productname > ");
   query_productFind(stmt, out);
 
   return 0;
@@ -196,6 +198,7 @@ void menus_generalPrint(FILE *out){
   fprintf(out, " # Choose what you want to show #\n");
   fprintf(out, " ################################\n");
   fprintf(out, "\n\t1. Products.\n\t2. Orders.\n\t3. Customers.\n\t4. Exit.\n\n");
+  fprintf(out, "Enter a number that corresponds to your choice > ");
 
   return;
 }
@@ -207,6 +210,7 @@ void menus_productsPrint(FILE *out){
   fprintf(out, " # Choose products option #\n");
   fprintf(out, " ##########################\n");
   fprintf(out, "\n\t1. Stock.\n\t2. Find.\n\t3. Back.\n\n");
+  fprintf(out, "Enter a number that corresponds to your choice > ");
 
   return;
 }
@@ -218,6 +222,7 @@ void menus_ordersPrint(FILE *out){
   fprintf(out, " # Choose orders option #\n");
   fprintf(out, " ########################\n");
   fprintf(out, "\n\t1. Open.\n\t2. Range.\n\t3. Detail.\n\t4. Back.\n\n");
+  fprintf(out, "Enter a number that corresponds to your choice > ");
 
   return;
 }
@@ -229,6 +234,7 @@ void menus_customersPrint(FILE *out){
   fprintf(out, " # Choose customer option #\n");
   fprintf(out, " ##########################\n");
   fprintf(out, "\n\t1. Find.\n\t2. List Products.\n\t3. Balance.\n\t4. Back\n\n");
+  fprintf(out, "Enter a number that corresponds to your choice > ");
 
   return;
 }
