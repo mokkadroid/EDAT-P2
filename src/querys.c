@@ -43,7 +43,7 @@ int query_productStock(SQLHSTMT *stmt, FILE *out){
   if(!SQL_SUCCEEDED(ret)) printf("ERROR SQLEXECUTE\n");
 
   /* Asigna la columna resultado a la variable y */
-  ret=SQLBindCol(*stmt, 1, SQL_SMALLINT, &y, sizeof(y), NULL);
+  ret=SQLBindCol(*stmt, 1, SQL_INTEGER, &y, sizeof(y), NULL);
   if(!SQL_SUCCEEDED(ret)) printf("ERROR SQLBINDCOL\n");
 
   /* Interfaz */
