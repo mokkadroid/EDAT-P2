@@ -1,6 +1,5 @@
 
 
-
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -15,26 +14,26 @@
 
 
 /*Private functions*/
-void menus_changeScreen(FILE *out);
-void menus_input(char *c);
-void menus_inputError(FILE *out);
+static void menus_changeScreen(FILE *out);
+static void menus_input(char *c);
+static void menus_inputError(FILE *out);
 
 /*Submenus*/
-void menus_generalPrint(FILE *out);
-void menus_productsPrint(FILE *out);
-void menus_ordersPrint(FILE *out);
-void menus_customersPrint(FILE *out);
+static void menus_generalPrint(FILE *out);
+static void menus_productsPrint(FILE *out);
+static void menus_ordersPrint(FILE *out);
+static void menus_customersPrint(FILE *out);
 
 
-int menus_products(SQLHSTMT *stmt, FILE *out);
-int menus_orders(SQLHSTMT *stmt, FILE *out);
-int menus_customers(SQLHSTMT *stmt, FILE *out);
-void menus_exit(FILE *out);
+static int menus_products(SQLHSTMT *stmt, FILE *out);
+static int menus_orders(SQLHSTMT *stmt, FILE *out);
+static int menus_customers(SQLHSTMT *stmt, FILE *out);
+static void menus_exit(FILE *out);
 
 
 /*Products*/
-int menus_productsStock(SQLHSTMT *stmt, FILE *out);
-int menus_productsFind(SQLHSTMT *stmt, FILE *out);
+static int menus_productsStock(SQLHSTMT *stmt, FILE *out);
+static int menus_productsFind(SQLHSTMT *stmt, FILE *out);
 
 
 
@@ -43,16 +42,15 @@ int menus_productsFind(SQLHSTMT *stmt, FILE *out);
 
 
 void menus_input(char *c){
-
+  int er=0;
   if(!c) return;
 
-  fseek(stdin,0,SEEK_END);
-  system("stty -echo");
-  system("/bin/stty raw");
+  er=fseek(stdin,0,SEEK_END); 
+  er+=system("stty -echo"); 
+  er+=system("/bin/stty raw");
   (*c) = getchar();
-  system("/bin/stty cooked");
-  system("stty echo");
-  /*scanf("%c\r",c);*/
+  er+=system("/bin/stty cooked"); 
+  er+=system("stty echo");
 
   return;
 }
@@ -64,22 +62,29 @@ void menus_input(char *c){
 
 
 int menus_general(SQLHSTMT *stmt, FILE *out){
-  char c;
+  char c=' ';
   int end=0;
 
-  if(!out) return 1;
 
-  while(!end){
+  if(!out || !stmt) return 1;
+
+  while(end==0){
     menus_generalPrint(out);
 
     menus_input(&c);
 
     if(c=='1'){
-      menus_products(stmt, out);
+      if(menus_products(stmt, out)!=0){
+         printf("\n > An error occurred while loading the products menu. < \n");
+      }
     }else if(c=='2'){
-      menus_orders(stmt, out);
+      if(menus_orders(stmt, out)!=0){
+         printf("\n > An error occurred while loading the orders menu. < \n");
+      }
     }else if(c=='3'){
-      menus_customers(stmt, out);
+      if(menus_customers(stmt, out)!=0){
+         printf("\n > An error occurred while loading the customers menu. < \n");
+      }
     }else if(c=='4'){
       end=1;
       menus_exit(out);
@@ -101,20 +106,24 @@ int menus_general(SQLHSTMT *stmt, FILE *out){
 /* General submenus */
 
 int menus_products(SQLHSTMT *stmt, FILE *out){
-  char c;
+  char c=' ';
   int end=0;
 
-  if(!out) return 1;
+  if(!out || !stmt) return 1;
 
-  while(!end){
+  while(end==0){
     menus_productsPrint(out);
 
     menus_input(&c);
 
     if(c=='1'){
-      menus_productsStock(stmt, out);
+      if(menus_productsStock(stmt, out)!=0){
+         printf("\n > An error occurred while loading the products stock. < \n");
+      }
     }else if(c=='2'){
-      menus_productsFind(stmt, out);
+      if(menus_productsFind(stmt, out)!=0){
+         printf("\n > An error occurred while loading the products menu. < \n");
+      }
     }else if(c=='3'){
       end=1;
       menus_exit(out);
@@ -131,15 +140,18 @@ int menus_products(SQLHSTMT *stmt, FILE *out){
 
 
 int menus_orders(SQLHSTMT *stmt, FILE *out){
+  if(!out||!stmt) return 1;
   menus_ordersPrint(out);
   return 0;
 }
 int menus_customers(SQLHSTMT *stmt, FILE *out){
+  if(!out||!stmt) return 1;
   menus_customersPrint(out);
   return 0;
 }
 
 void menus_exit(FILE *out){
+  if(!out) return;
   fprintf(out, "\nMENU Exit\n");
   return;
 }
@@ -156,20 +168,20 @@ void menus_exit(FILE *out){
 int menus_productsStock(SQLHSTMT *stmt, FILE *out){
 
   printf("\nEnter productcode > ");
-  query_productStock(stmt, out);
+  if(query_productStock(stmt, out)!=0) return 1;
 
   return 0;
 }
 int menus_productsFind(SQLHSTMT *stmt, FILE *out){
 
   printf("\nEnter productname > ");
-  query_productFind(stmt, out);
+  if(query_productFind(stmt, out)!=0) return 1;
 
   return 0;
 }
 
 
-/* Orders options* /
+/* Orders options */
 
 /* Customers options */
 
