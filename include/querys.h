@@ -39,6 +39,12 @@ int query_productStock(SQLHSTMT *stmt, FILE *out);
  */
 int query_productFind(SQLHSTMT *stmt, FILE *out);
 
+int query_orderOpen(SQLHSTMT *stmt, FILE *out);
+
+int query_orderRange(SQLHSTMT *stmt, FILE *out);
+
+int query_orderDetails(SQLHSTMT *stmt, FILE *out);
+
 
 
 
