@@ -3,7 +3,6 @@
  *
  * @file odbc.h
  * @author Profesores de EDAT
- * @date 28-10-2020
  */
 
 
