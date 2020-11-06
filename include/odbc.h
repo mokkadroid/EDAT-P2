@@ -1,3 +1,12 @@
+/**
+ * @brief It defines the odbc functions to connect to the database
+ *
+ * @file odbc.h
+ * @author Profesores de EDAT
+ * @date 28-10-2020
+ */
+
+
 #ifndef AUX_H
 #define AUX_H
 
