@@ -1,3 +1,12 @@
+/**
+ * @brief Implementa las funciones que realizan las querys a la base de datos
+ *
+ * @file querys.c
+ * @author Erik Yuste & Lucia Martinez-Valero
+ * @version 1.0
+ * @date 29-10-2020
+ */
+
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -7,10 +16,48 @@
 
 
 
+/*Privadas*/
+
+/**
+* stop Función que detiene la ejecución del programa hasta que el usuario pulsa una tecla
+*
+* @date 02-11-2020
+* @author: Erik Yuste
+*/
 static void stop();
 
+
+/**
+* query_productStockInterface imprime el resultado de la query 'Stock'
+*
+* @date 29-10-2020
+* @author: Erik Yuste
+*
+* @param stmt Puntero a SQLHSTMT
+* @param result Puntero a SQLINTEGER donde se recibirá el resultado de la query
+* @param productcode Puntero a SQLCHAR donde se encuentra el codigo de producto introducido por el usuario
+*/
 static void query_productStockInterface(SQLHSTMT *stmt, SQLINTEGER *result, SQLCHAR *productcode);
+/**
+* query_productFindInterface imprime el resultado de la query 'Find'
+*
+* @date 01-11-2020
+* @author: Lucia Martinez-Valero
+*
+* @param stmt Puntero a SQLHSTMT
+* @param pcode Puntero a SQLCHAR donde se recibirá el nombre de los productos resultado de la query
+* @param pname Puntero a SQLCHAR donde se recibirá el codigo de los productos resultado de la query
+* @param string Puntero a char donde se almacena la cadena de caracters introducida por el usuario
+*/
 static void query_productFindInterface(SQLHSTMT *stmt, SQLCHAR *pcode, SQLCHAR *pname, char *string);
+
+
+
+
+
+
+
+
 
 
 
