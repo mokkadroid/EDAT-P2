@@ -1,3 +1,10 @@
+/**
+ * @brief Implementa las funciones odbc de conexion y desconexion de la base de datos
+ *
+ * @file odbc.c
+ * @author Profesores de EDAT (modificado ligeramente por Erik Yuste)
+ */
+
 #include <stdlib.h>
 #include <stdio.h>
 #include <sql.h>
