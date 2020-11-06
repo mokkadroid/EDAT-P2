@@ -201,7 +201,7 @@ void query_productFindInterface(SQLHSTMT *stmt, SQLCHAR *pcode, SQLCHAR *pname, 
 
   /*stop();*/
 
-  return;
+  return 0;
 }
 
 /*
@@ -270,11 +270,13 @@ static void query_orderOpenInterface(SQLHSTMT *stmt, SQLCHAR *onum){
   printf("\n");
   if(a==1) printf("\n < All the orders have been shipped >\n\n",string);
 
+  return;
+
 }
 
-int query_orderRange(SQLHSTMT *stmt, FILE *out);
+int query_orderRange(SQLHSTMT *stmt, FILE *out){}
 
-int query_orderDetails(SQLHSTMT *stmt, FILE *out);
+int query_orderDetails(SQLHSTMT *stmt, FILE *out){}
 
 
 
