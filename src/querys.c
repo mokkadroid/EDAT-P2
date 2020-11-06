@@ -110,13 +110,12 @@ int query_productStock(SQLHSTMT *stmt, FILE *out){
 
 void query_productStockInterface(SQLHSTMT *stmt, SQLINTEGER *result, SQLCHAR *productcode){
   SQLRETURN ret;
-  int a=0;
 
-  while(SQL_SUCCEEDED(ret = SQLFetch(*stmt))) {
-      printf("\n\n < There are %d products with the code \'%s\' >\n\n", *result, (char*) productcode);
-      a++;
-  }
-  if(a==0) printf("\n\n < No products with the code \'%s\' found >\n\n",(char*) productcode);
+  ret=SQLFetch(*stmt);
+  if(SQL_SUCCEEDED(ret)) printf("\n\n < There are %d products with the code \'%s\' >\n\n", *result, (char*) productcode);
+
+  else printf("\n\n < No products with the code \'%s\' found >\n\n",(char*) productcode);
+
 
   /*stop();*/
 
