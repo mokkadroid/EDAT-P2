@@ -21,7 +21,8 @@
  * @date 28-10-2020
  * @author: Erik Yuste
  *
- * @param game Puntero a SQLHSTMT
+ * @param stmt Puntero a SQLHSTMT
+ * @param out Puntero a FILE donde se imprimirá la información
  * @return Devuelve 0 si no ha habido ningún problema y otro entero si lo ha habido
  */
 int menus_general(SQLHSTMT *stmt, FILE *out);
