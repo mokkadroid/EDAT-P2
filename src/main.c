@@ -1,4 +1,11 @@
-
+/**
+ * @brief It implements the main program
+ *
+ * @file main.c
+ * @author Erik Yuste & Lucía Martinez-Valero
+ * @version 1.0
+ * @date 28-10-2020
+ */
 
 
 #include <stdio.h>
@@ -7,17 +14,6 @@
 #include <sql.h>
 #include <sqlext.h>
 #include "odbc.h"
-
-
-
-
-
-
-
-
-
-
-
 
 
 
@@ -68,8 +64,6 @@ int main(){
 
   return 0;
 }
-
-
 
 
 
