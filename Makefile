@@ -6,7 +6,7 @@ OBJ=./obj
 SRC=./src
 INC=./include
 
-PROG_NAME=Main
+PROG_NAME=menu
 
 
 

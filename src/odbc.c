@@ -1,3 +1,10 @@
+/**
+ * @brief Implementa las funciones odbc de conexion y desconexion de la base de datos
+ *
+ * @file odbc.c
+ * @author Profesores de EDAT (modificado ligeramente por Erik Yuste)
+ */
+
 #include <stdlib.h>
 #include <stdio.h>
 #include <sql.h>
@@ -5,14 +12,12 @@
 #include "odbc.h"
 
 
-void odbc_try(){
-  printf("ODBC_TRY\n" );
-}
+
 
 
 /* REPORT OF THE MOST RECENT ERROR USING HANDLE handle */
-void odbc_extract_error(char *fn, SQLHANDLE handle, SQLSMALLINT type) {
-    SQLINTEGER i = 0;
+static void odbc_extract_error(char *fn, SQLHANDLE handle, SQLSMALLINT type) {
+    SQLSMALLINT i = 0;
     SQLINTEGER native;
     SQLCHAR state[ 7 ];
     SQLCHAR text[256];
@@ -22,19 +27,23 @@ void odbc_extract_error(char *fn, SQLHANDLE handle, SQLSMALLINT type) {
     fprintf(stderr, "\nThe driver reported the following diagnostics while running %s\n\n", fn);
 
     do {
-        ret = SQLGetDiagRec(type, handle, ++i, state, &native, text, sizeof(text), &len );
+        ret = SQLGetDiagRec(type, handle, ++i, state, &native, text, (SQLSMALLINT) sizeof(text), &len );
         if (SQL_SUCCEEDED(ret)) {
-            printf("%s:%d:%d:%s\n", state, i, native, text);
+            printf("%s:%d:%d:%s\n", (char*) state, i, native, (char*) text);
         }
     } while( ret == SQL_SUCCESS );
 }
 
+
+
+
+
 /* STANDARD CONNECTION PROCEDURE */
-int odbc_connect(SQLHENV* env, SQLHDBC* dbc) {
+SQLRETURN odbc_connect(SQLHENV* env, SQLHDBC* dbc) {
     SQLRETURN ret;
 
     /* Allocate an environment handle */
-    ret = SQLAllocHandle(SQL_HANDLE_ENV, SQL_NULL_HANDLE, env);
+    ret = SQLAllocHandle(SQL_HANDLE_ENV, (SQLHANDLE) SQL_NULL_HANDLE, env);
     if (!SQL_SUCCEEDED(ret)) {
         odbc_extract_error("", *env, SQL_HANDLE_ENV);
         return ret;
@@ -65,8 +74,12 @@ int odbc_connect(SQLHENV* env, SQLHDBC* dbc) {
     return ret;
 }
 
+
+
+
+
 /* STANDARD DISCONNECTION PROCEDURE */
-int odbc_disconnect(SQLHENV env, SQLHDBC dbc) {
+SQLRETURN odbc_disconnect(SQLHENV env, SQLHDBC dbc) {
     SQLRETURN ret;
 
     /* Disconnect from database */

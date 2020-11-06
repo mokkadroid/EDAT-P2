@@ -1,4 +1,11 @@
-
+/**
+ * @brief It implements the main program
+ *
+ * @file main.c
+ * @author Erik Yuste & Lucía Martinez-Valero
+ * @version 1.0
+ * @date 28-10-2020
+ */
 
 
 #include <stdio.h>
@@ -7,17 +14,6 @@
 #include <sql.h>
 #include <sqlext.h>
 #include "odbc.h"
-
-
-
-
-
-
-
-
-
-
-
 
 
 
@@ -47,12 +43,18 @@ int main(){
 
 
 
-  menus_general(&stmt, stdout);
+  if(menus_general(&stmt, stdout)!=0){
+      printf("\n > An error occurred while loading the menus. < \n");
+  }
 
 
 
   /* free up statement handle */
-  SQLFreeHandle(SQL_HANDLE_STMT, stmt);
+  ret = SQLFreeHandle(SQL_HANDLE_STMT, stmt);
+  if (!SQL_SUCCEEDED(ret)) {
+      printf("\n > An error occurred while freeing the memory. < \n");
+  }
+
 
   /* DISCONNECT */
   ret = odbc_disconnect(env, dbc);
@@ -62,8 +64,6 @@ int main(){
 
   return 0;
 }
-
-
 
 
 
