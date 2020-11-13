@@ -51,7 +51,7 @@ static void query_productStockInterface(SQLHSTMT *stmt, SQLINTEGER *result, SQLC
 */
 static void query_productFindInterface(SQLHSTMT *stmt, SQLCHAR *pcode, SQLCHAR *pname, char *string);
 /**
-* query_productStockInterface imprime el resultado de la query 'Stock'
+* query_orderOpenInterface imprime el resultado de la query 'Stock'
 *
 * @date 06-11-2020
 * @author: Lucia Martinez-Valero
@@ -129,7 +129,7 @@ void query_productStockInterface(SQLHSTMT *stmt, SQLINTEGER *result, SQLCHAR *pr
 int query_productFind(SQLHSTMT *stmt, FILE *out){
   SQLRETURN ret; /* ODBC API return status */
   SQLCHAR productcode[MY_CHAR_LEN], productname[MY_CHAR_LEN];
-  char string[MY_CHAR_LEN], query[MY_CHAR_LEN]="select p.productcode, p.productname from products p where p.productname like '%";
+  char string[MY_CHAR_LEN], query[MY_CHAR_LEN]="select p.productcode, p.productname from products p where UPPER(p.productname) like UPPER('%"
 
 
 
@@ -144,6 +144,7 @@ int query_productFind(SQLHSTMT *stmt, FILE *out){
 
   strcat(query, string);
   strcat(query, "%' order by p.productcode");
+  strcat(query, "%') order by p.productcode");
 
   ret=SQLPrepare((*stmt), (SQLCHAR*) query, SQL_NTS);
   if(!SQL_SUCCEEDED(ret)) printf("ERROR SQLPREPARE %d\n", ret);
@@ -184,11 +185,11 @@ void query_productFindInterface(SQLHSTMT *stmt, SQLCHAR *pcode, SQLCHAR *pname, 
     return;
   }
 
-  printf("\n\t| Product code\t| Product name\n");
-  printf(  "--------+-----------------+--------------\n");
-
-
   while(SQL_SUCCEEDED(ret = SQLFetch(*stmt))) {
+      if(a==1){
+        printf("\n\t| Product code\t| Product name\n");
+        printf(  "--------+-----------------+--------------\n");
+      }
       printf("   %d\t| %s\t| %s\t\n", a, (char*) pcode, (char*) pname);
       a++;
       if((a%10)==0){
@@ -216,7 +217,7 @@ void query_productFindInterface(SQLHSTMT *stmt, SQLCHAR *pcode, SQLCHAR *pname, 
 int query_orderOpen(SQLHSTMT *stmt, FILE *out){
   SQLRETURN ret; /* ODBC API return status */
   SQLINTEGER ordernumber;
-  char query[MY_CHAR_LEN]="select o.ordernumber from orders o where o.shippeddate=null order by o.ordernumber ";
+  char query[MY_CHAR_LEN]="select o.ordernumber from orders o where o.shippeddate=null order by o.ordernumber";
 
 
 
