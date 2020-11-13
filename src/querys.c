@@ -135,7 +135,7 @@ int query_productFind(SQLHSTMT *stmt, FILE *out){
 
 
 
-  if(!stmt || !out) return 1;
+  if(!stmt || !out) return -1;
 
 
   /*fprintf(out," > ");*/
@@ -179,6 +179,11 @@ void query_productFindInterface(SQLHSTMT *stmt, SQLCHAR *pcode, SQLCHAR *pname, 
   SQLRETURN ret;
   int a=1;
 
+  if(!stmt || !pcode || !pname || !string){
+    printf("INTERFACE FAILURE\n");
+    return;
+  }
+
   printf("\n\t| Product code\t| Product name\n");
   printf(  "--------+-----------------+--------------\n");
 
@@ -201,7 +206,7 @@ void query_productFindInterface(SQLHSTMT *stmt, SQLCHAR *pcode, SQLCHAR *pname, 
 
   /*stop();*/
 
-  return 0;
+  return;
 }
 
 /*
@@ -210,32 +215,32 @@ void query_productFindInterface(SQLHSTMT *stmt, SQLCHAR *pcode, SQLCHAR *pname, 
 
 int query_orderOpen(SQLHSTMT *stmt, FILE *out){
   SQLRETURN ret; /* ODBC API return status */
-  SQLCHAR ordernumber[MY_CHAR_LEN];
+  SQLINTEGER ordernumber;
   char query[MY_CHAR_LEN]="select o.ordernumber from orders o where o.shippeddate=null order by o.ordernumber ";
 
 
 
 
 
-  if(!stmt || !out) return 1;
+  if(!stmt || !out) return -1;
 
 
-  /*fprintf(out," > ");*/
+  fprintf(out," > ");
   if(fflush(out)!=0) printf("ERROR FFLUSH");
 
   ret=SQLPrepare((*stmt), (SQLCHAR*) query, SQL_NTS);
   if(!SQL_SUCCEEDED(ret)) printf("ERROR SQLPREPARE %d\n", ret);
 
 
-  /*ret=SQLBindParameter((*stmt), 1, SQL_PARAM_INPUT, SQL_C_CHAR, SQL_CHAR, 0, 0, string, 0, NULL);
-  if(!SQL_SUCCEEDED(ret)) printf("ERROR SQLBINDPARAMETER\n");*/
+  ret=SQLBindParameter((*stmt), 1, SQL_PARAM_INPUT, SQL_C_SLONG, SQL_INTEGER, 0, 0, &ordernumber, 0, NULL);
+  if(!SQL_SUCCEEDED(ret)) printf("ERROR SQLBINDPARAMETER\n");
 
   /* Ejecuta la query */
   ret=SQLExecute(*stmt);
   if(!SQL_SUCCEEDED(ret)) printf("ERROR SQLEXECUTE\n");
 
   /* Asigna la columna resultado a la variable y */
-  ret=SQLBindCol(*stmt, 1, SQL_CHAR, ordernumber, (SQLLEN) sizeof(ordernumber), NULL);
+  ret=SQLBindCol(*stmt, 1, SQL_INT, ordernumber, (SQLLEN) sizeof(ordernumber), NULL);
   if(!SQL_SUCCEEDED(ret)) printf("ERROR SQLBINDCOL\n");
 
 
@@ -252,7 +257,7 @@ int query_orderOpen(SQLHSTMT *stmt, FILE *out){
 
 /* Interfaz */
 static void query_orderOpenInterface(SQLHSTMT *stmt, SQLCHAR *onum){
-
+  int a=1;
 
   printf("\n\t| Order number\t|\n");
   printf(  "--------+-----------------+\n");
@@ -268,7 +273,7 @@ static void query_orderOpenInterface(SQLHSTMT *stmt, SQLCHAR *onum){
       }
   }
   printf("\n");
-  if(a==1) printf("\n < All the orders have been shipped >\n\n",string);
+  if(a==1) printf("\n < All the orders have been shipped >\n\n");
 
   return;
 

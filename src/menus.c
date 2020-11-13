@@ -41,7 +41,7 @@ static void menus_changeScreen(FILE *out);
 */
 static void menus_input(char *c);
 /**
-* menus_inputError Imprime un mensaje de error 
+* menus_inputError Imprime un mensaje de error
 *
 * @date 28-10-2020
 * @author: Erik Yuste
@@ -80,7 +80,7 @@ static void menus_productsPrint(FILE *out);
 * menus_ordersPrint Imprime la interfaz que ve el usuario en el menu de pedidos
 *
 * @date W.I.P.
-* @author: 
+* @author:
 *
 * @param out Puntero a FILE donde se imprimirá el menu
 */
@@ -89,7 +89,7 @@ static void menus_ordersPrint(FILE *out);
 * menus_clientesPrint Imprime la interfaz que ve el usuario en el menu de clientes
 *
 * @date W.I.P.
-* @author: 
+* @author:
 *
 * @param out Puntero a FILE donde se imprimirá el menu
 */
@@ -111,7 +111,7 @@ static int menus_products(SQLHSTMT *stmt, FILE *out);
 * menus_orders Implementa la lógica del menu de pedidos
 *
 * @date W.I.P.
-* @author: 
+* @author:
 *
 * @param Puntero a SQLHSTMT
 * @param out Puntero a FILE donde se imprimirá el menu
@@ -122,7 +122,7 @@ static int menus_orders(SQLHSTMT *stmt, FILE *out);
 * menus_customers Implementa la lógica del menu de clientes
 *
 * @date W.I.P.
-* @author: 
+* @author:
 *
 * @param Puntero a SQLHSTMT
 * @param out Puntero a FILE donde se imprimirá el menu
@@ -185,11 +185,11 @@ void menus_input(char *c){
   int er=0;
   if(!c) return;
 
-  er=fseek(stdin,0,SEEK_END); 
-  er+=system("stty -echo"); 
+  er=fseek(stdin,0,SEEK_END);
+  er+=system("stty -echo");
   er+=system("/bin/stty raw");
   (*c) = getchar();
-  er+=system("/bin/stty cooked"); 
+  er+=system("/bin/stty cooked");
   er+=system("stty echo");
 
   return;
@@ -401,6 +401,6 @@ void menus_inputError(FILE *out){
 }
 
 void menus_changeScreen(FILE *out){
-  fprintf(out, "\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n");
+  fprintf(out, "\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n");
   return;
 }
