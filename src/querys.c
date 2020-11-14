@@ -286,8 +286,10 @@ static void query_orderOpenInterface(SQLHSTMT *stmt, SQLCHAR *onum){
 FROM  orders o
 WHERE o.orderdate >= '2003-01-01' AND o.orderdate <= '2004-01-01'
 ORDER BY o.ordernumber DESC*/
-int query_orderRange(SQLHSTMT *stmt, FILE *out, SQL_DATE orderdate, SQL_DATE shippeddate){
+int query_orderRange(SQLHSTMT *stmt, FILE *out){
   SQLRETURN ret; /* ODBC API return status */
+  SQLCHAR ordernumber;
+  SQL_DATE orderdate, shippeddate
   char odd[MY_CHAR_LEN], odd2[MY_CHAR_LEN], query[MY_CHAR_LEN]="select o.ordernumber, o.orderdate, o.shippeddate from orders o where o.shippeddate >= ? and o.orderdate <= ? order by o.ordernumber desc";
 
   if(!stmt || !out) return 1;
