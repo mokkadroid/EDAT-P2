@@ -60,6 +60,21 @@ static void query_productFindInterface(SQLHSTMT *stmt, SQLCHAR *pcode, SQLCHAR *
 * @param result Puntero a SQLCHAR donde se recibirá el resultado de la query
 */
 static void query_orderOpenInterface(SQLHSTMT *stmt, SQLCHAR *onum);
+/**
+* query_customersFindInterface imprime el resultado de la query 'Find'
+*
+* @date 13-11-2020
+* @author: Erik Yuste
+*
+* @param stmt Puntero a SQLHSTMT
+* @param cnum Puntero a SQLCHAR donde se recibirá el numero de los clientes resultado de la query
+* @param cname Puntero a SQLCHAR donde se recibirá el nombre de los clientes resultado de la query
+* @param cfn Puntero a SQLCHAR donde se recibirá el primer nombre de los clientes resultado de la query
+* @param csn Puntero a SQLCHAR donde se recibirá el segundo nombre de los clientes resultado de la query
+* @param string Puntero a char donde se almacena la cadena de caracters introducida por el usuario
+*/
+void query_customersFindInterface(SQLHSTMT *stmt, SQLCHAR *cnum, SQLCHAR *cname, SQLCHAR *cfn, SQLCHAR *csn,char *string);
+
 
 
 
@@ -129,30 +144,25 @@ void query_productStockInterface(SQLHSTMT *stmt, SQLINTEGER *result, SQLCHAR *pr
 int query_productFind(SQLHSTMT *stmt, FILE *out){
   SQLRETURN ret; /* ODBC API return status */
   SQLCHAR productcode[MY_CHAR_LEN], productname[MY_CHAR_LEN];
-  char string[MY_CHAR_LEN], query[MY_CHAR_LEN]="select p.productcode, p.productname from products p where UPPER(p.productname) like UPPER('%"
+  SQLCHAR string[MY_CHAR_LEN], query[MY_CHAR_LEN]="select p.productcode, p.productname from products p where position(UPPER(?) in UPPER(p.productname))>0 order by p.productcode";
 
 
 
 
+   if(!stmt || !out) return 1;
 
-  if(!stmt || !out) return -1;
 
+   (void) fflush(out);
+   if(scanf("%s", (char*) string)==EOF) printf("ERROR SCANF");
 
-  /*fprintf(out," > ");*/
-  if(fflush(out)!=0) printf("ERROR FFLUSH");
-  if(scanf("%s", string)==EOF) printf("ERROR SCANF");
-
-  strcat(query, string);
-  strcat(query, "%' order by p.productcode");
-  strcat(query, "%') order by p.productcode");
 
   ret=SQLPrepare((*stmt), (SQLCHAR*) query, SQL_NTS);
   if(!SQL_SUCCEEDED(ret)) printf("ERROR SQLPREPARE %d\n", ret);
 
 
-  /*ret=SQLBindParameter((*stmt), 1, SQL_PARAM_INPUT, SQL_C_CHAR, SQL_CHAR, 0, 0, string, 0, NULL);
-  if(!SQL_SUCCEEDED(ret)) printf("ERROR SQLBINDPARAMETER\n");*/
-
+  ret=SQLBindParameter((*stmt), 1, SQL_PARAM_INPUT, SQL_C_CHAR, SQL_CHAR, 0, 0, string, 0, NULL);
+  if(!SQL_SUCCEEDED(ret)) printf("ERROR SQLBINDPARAMETER\n");
+  
   /* Ejecuta la query */
   ret=SQLExecute(*stmt);
   if(!SQL_SUCCEEDED(ret)) printf("ERROR SQLEXECUTE\n");
@@ -217,16 +227,12 @@ void query_productFindInterface(SQLHSTMT *stmt, SQLCHAR *pcode, SQLCHAR *pname, 
 int query_orderOpen(SQLHSTMT *stmt, FILE *out){
   SQLRETURN ret; /* ODBC API return status */
   SQLINTEGER ordernumber;
-  char query[MY_CHAR_LEN]="select o.ordernumber from orders o where o.shippeddate=null order by o.ordernumber";
-
-
-
+  char query[MY_CHAR_LEN]="select o.ordernumber from orders o where o.shippeddate >= ? order by o.ordernumber";
 
 
   if(!stmt || !out) return -1;
 
 
-  fprintf(out," > ");
   if(fflush(out)!=0) printf("ERROR FFLUSH");
 
   ret=SQLPrepare((*stmt), (SQLCHAR*) query, SQL_NTS);
@@ -280,7 +286,41 @@ static void query_orderOpenInterface(SQLHSTMT *stmt, SQLCHAR *onum){
 
 }
 
-int query_orderRange(SQLHSTMT *stmt, FILE *out){}
+/*SELECT o.ordernumber, o.orderdate, o.shippeddate
+FROM  orders o
+WHERE o.orderdate >= '2003-01-01' AND o.orderdate <= '2004-01-01'
+GROUP  BY o.ordernumber*/
+int query_orderRange(SQLHSTMT *stmt, FILE *out, SQL_DATE orderdate, SQL_DATE shippeddate){
+  SQLRETURN ret; /* ODBC API return status */
+  SQLINTEGER ordernumber;
+  char query[MY_CHAR_LEN]="select o.ordernumber, o.orderdate, o.shippeddate from orders o where o.shippeddate like";
+
+  if(!stmt || !out) return -1;
+
+  if(fflush(out)!=0) printf("ERROR FFLUSH");
+
+  ret=SQLPrepare((*stmt), (SQLCHAR*) query, SQL_NTS);
+  if(!SQL_SUCCEEDED(ret)) printf("ERROR SQLPREPARE %d\n", ret);
+
+
+  /* Ejecuta la query */
+  ret=SQLExecute(*stmt);
+  if(!SQL_SUCCEEDED(ret)) printf("ERROR SQLEXECUTE\n");
+
+  ret=SQLBindCol(*stmt, 1, SQL_INT, ordernumber, (SQLLEN) sizeof(ordernumber), NULL);
+  if(!SQL_SUCCEEDED(ret)) printf("ERROR SQLBINDCOL\n");
+
+
+  /* Interfaz */
+  query_orderOpenInterface(stmt, ordernumber);
+
+  ret=SQLCloseCursor(*stmt);
+  if(!SQL_SUCCEEDED(ret)) printf("ERROR SQLCLOSECURSOR\n");
+
+  if(fflush(out)!=0) printf("ERROR FFLUSH");
+
+  return 0;
+}
 
 int query_orderDetails(SQLHSTMT *stmt, FILE *out){}
 
