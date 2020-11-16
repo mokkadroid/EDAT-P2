@@ -60,6 +60,7 @@ static void query_productFindInterface(SQLHSTMT *stmt, SQLCHAR *pcode, SQLCHAR *
 * @param result Puntero a SQLCHAR donde se recibirá el resultado de la query
 */
 static void query_orderOpenInterface(SQLHSTMT *stmt, SQLCHAR *onum);
+static void  query_orderRangeInterface(SQLHSTMT *stmt, SQLINTEGER ordernumber, SQLDATE orderdate, SQLDATE shippeddate);
 /**
 * query_customersFindInterface imprime el resultado de la query 'Find'
 *
@@ -198,7 +199,7 @@ void query_productFindInterface(SQLHSTMT *stmt, SQLCHAR *pcode, SQLCHAR *pname, 
   while(SQL_SUCCEEDED(ret = SQLFetch(*stmt))) {
       if(a==1){
         printf("\n\t| Product code\t| Product name\n");
-        printf(  "--------+-----------------+--------------\n");
+        printf("--------+-----------------+--------------\n");
       }
       printf("   %d\t| %s\t| %s\t\n", a, (char*) pcode, (char*) pname);
       a++;
@@ -226,7 +227,7 @@ void query_productFindInterface(SQLHSTMT *stmt, SQLCHAR *pcode, SQLCHAR *pname, 
 
 int query_orderOpen(SQLHSTMT *stmt, FILE *out){
   SQLRETURN ret; /* ODBC API return status */
-  SQLCHAR ordernumber[MY_CHAR_LEN];
+  SQLINTEGER ordernumber[MY_CHAR_LEN];
   char query[MY_CHAR_LEN]="select o.ordernumber from orders o where o.shippeddate isnull order by o.ordernumber";
 
 
@@ -282,14 +283,18 @@ static void query_orderOpenInterface(SQLHSTMT *stmt, SQLCHAR *onum){
 
 }
 
+/*
+ *  ORDER RANGE
+ */
+
 /*SELECT o.ordernumber, o.orderdate, o.shippeddate
 FROM  orders o
 WHERE o.orderdate >= '2003-01-01' AND o.orderdate <= '2004-01-01'
 ORDER BY o.ordernumber DESC*/
 int query_orderRange(SQLHSTMT *stmt, FILE *out){
   SQLRETURN ret; /* ODBC API return status */
-  SQLCHAR ordernumber;
-  SQL_DATE orderdate, shippeddate
+  SQLINTEGER ordernumber;
+  SQLDATE orderdate, shippeddate
   char odd[MY_CHAR_LEN], odd2[MY_CHAR_LEN], query[MY_CHAR_LEN]="select o.ordernumber, o.orderdate, o.shippeddate from orders o where o.shippeddate >= ? and o.orderdate <= ? order by o.ordernumber desc";
 
   if(!stmt || !out) return 1;
@@ -326,13 +331,22 @@ int query_orderRange(SQLHSTMT *stmt, FILE *out){
   if(!SQL_SUCCEEDED(ret)) printf("ERROR SQLPREPARE %d\n", ret);
 
 
-  ret=SQLBindParameter((*stmt), 1, SQL_PARAM_INPUT, SQL_C_CHAR, SQL_TYPE_DATE, 10, 0, odd, 0, NULL);
+  ret=SQLBindParameter((*stmt), 1, SQL_PARAM_INPUT, SQL_C_CHAR, SQL_DATE, 10, 0, odd, 0, NULL);
   if(!SQL_SUCCEEDED(ret)) printf("ERROR SQLBINDPARAMETER\n");
-  ret=SQLBindParameter((*stmt), 2, SQL_PARAM_INPUT, SQL_C_CHAR, SQL_TYPE_DATE, 10, 0, odd2, 0, NULL);
+  ret=SQLBindParameter((*stmt), 2, SQL_PARAM_INPUT, SQL_C_CHAR, SQL_DATE, 10, 0, odd2, 0, NULL);
   if(!SQL_SUCCEEDED(ret)) printf("ERROR SQLBINDPARAMETER\n");
 
+  /* Asigna la columna resultado a la variable  */
+  ret=SQLBindCol(*stmt, 1, SQL_INTEGER, ordernumber, (SQLLEN) sizeof(ordernumber), NULL);
+  if(!SQL_SUCCEEDED(ret)) printf("ERROR SQLBINDCOL 1\n");
+  ret=SQLBindCol(*stmt, 2, SQL_DATE, orderdate, (SQLLEN) sizeof(orderdate), NULL);
+  if(!SQL_SUCCEEDED(ret)) printf("ERROR SQLBINDCOL 2\n");
+  ret=SQLBindCol(*stmt, 3, SQL_DATE, shippeddate, (SQLLEN) sizeof(shippeddate), NULL);
+  if(!SQL_SUCCEEDED(ret)) printf("ERROR SQLBINDCOL 3\n");
+
+
   /* Interfaz */
-  query_orderOpenInterface(stmt, ordernumber);
+  query_orderRangeInterface(stmt, ordernumber, orderdate, shippeddate);
 
   ret=SQLCloseCursor(*stmt);
   if(!SQL_SUCCEEDED(ret)) printf("ERROR SQLCLOSECURSOR\n");
@@ -342,7 +356,34 @@ int query_orderRange(SQLHSTMT *stmt, FILE *out){
   return 0;
 }
 
+static void  query_orderRangeInterface(SQLHSTMT *stmt, SQLINTEGER *ordernumber, SQLDATE *orderdate, SQLDATE *shippeddate){
+  int a=1;
+  SQLRETURN ret;
+  char t[]="    | Order\t| Date  \t| Shipped\n"
+
+  while(SQL_SUCCEEDED(ret = SQLFetch(*stmt))) {
+    if(a==1){
+      printf("\n%s", t);
+      printf(  "----+-----------+-----------------------+-----------------------\n");
+    }
+
+    if(a<10)
+      printf(" 0%d | %s\t| %s\t| %s\t| %s\t\n", a, (int*) ordernumber, (char*) orderdate, (char*)shippeddate);
+    else
+      printf(" %d | %s\t| %s\t| %s\t| %s\t\n", a, (int*) ordernumber, (char*) orderdate, (char*)shippeddate);
+
+      a++;
+      if((a%10)==0){
+
+        stop();
+        printf("\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n%s", t);
+        printf(  "----+-----------+-----------------------+-----------------------+---------------------\n");
+      }
+  }
+}
+
 int query_orderDetails(SQLHSTMT *stmt, FILE *out){}
+
 
 
 
