@@ -395,7 +395,7 @@ order by
 int query_orderDetails(SQLHSTMT *stmt, FILE *out){
   SQLRETURN ret; /* ODBC API return status */
   SQLINTEGER ordernumber, qord, price, sbt;
-  SQLCHAR pcode, stat;
+  SQLCHAR pcode[MY_CHAR_LEN], stat[MY_CHAR_LEN];
   SQLDATE orderdate;
   int odn=0;
   char query[MY_CHAR_LEN]="o.ordernumber, o.orderdate, o.status, od.productcode, od.quantityordered, od.priceeach, od.quantityordered * od.priceeach as subtotal from orders o join orderdetails od on o.ordernumber = od.ordernumber where o.ordernumber = ? group by o.ordernumber, od.productcode, od.quantityordered, od.priceeach, od.orderlinenumber order by od.orderlinenumber";
@@ -428,8 +428,18 @@ int query_orderDetails(SQLHSTMT *stmt, FILE *out){
   if(!SQL_SUCCEEDED(ret)) printf("ERROR SQLBINDCOL 3\n");
   ret=SQLBindCol(*stmt, 5, SQL_INTEGER, qord, (SQLLEN) sizeof(qord), NULL);
   if(!SQL_SUCCEEDED(ret)) printf("ERROR SQLBINDCOL 1\n");
+  ret=SQLBindCol(*stmt, 5, SQL_INTEGER, price, (SQLLEN) sizeof(price), NULL);
+  if(!SQL_SUCCEEDED(ret)) printf("ERROR SQLBINDCOL 1\n");
+  ret=SQLBindCol(*stmt, 5, SQL_INTEGER, sbt, (SQLLEN) sizeof(sbt), NULL);
+  if(!SQL_SUCCEEDED(ret)) printf("ERROR SQLBINDCOL 1\n");
 
+  ret=SQLCloseCursor(*stmt);
+  if(!SQL_SUCCEEDED(ret)) printf("ERROR SQLCLOSECURSOR\n");
+
+  if(fflush(out)!=0) printf("ERROR FFLUSH");
 }
+
+static void  query_orderDetailsInterface(SQLHSTMT *stmt, SQLINTEGER *odnum, SQLDATE *oddate, SQLCHAR *st ){
 /*
  *  CUSTOMERS FIND
  */
