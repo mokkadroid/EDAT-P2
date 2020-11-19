@@ -273,6 +273,7 @@ static void query_orderOpenInterface(SQLHSTMT *stmt, SQLINTEGER *onum){
         stop();
         printf("\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\t| Order number\t|\n");
         printf(  "--------+-----------------+\n");
+        printf("   %d\t| %d\t|\n", a, *((int*) onum));
       }
   }
   printf("\n");
@@ -303,22 +304,8 @@ int query_orderRange(SQLHSTMT *stmt, FILE *out){
 
   if(fflush(out)!=0) printf("ERROR FFLUSH");
   printf("Enter dates (YYYY-MM-DD - YYYY-MM-DD) > ");
-  if(scanf("%s", in)==EOF) printf("ERROR SCANF");
-
-  /*Sabemos que las fechas tienen el siguiente formato: YYYY-MM-DD, vamos a comprobar que sea así*/
-  if(in[4]=='-' && in[7]=='-' && in[11]=='-' && in[17]=='-' && in[20]=='-' && in[23]=='\0'){ /* Con la comprobacion de la posicion de los guiones y \0, vemos si el formato es correcto */
-    if(in[5]>'1' || in[18]>'1' || (in[5]=='1' && in[6]>'2') || (in[18]=='1' && in[19]>'2')){ /* vemos que el mes sea correcto*/
-      printf("Error in MM, value over 12.\n");
-      return 0;
-    }
-    if(in[8]>'3'|| in[21]>'3' || (in[8]=='3' && in[9]>'1') || (in[21]=='3' && in[22]>'1')){
-      printf("Error in DD, value over 31.\n");
-      return 0;
-    }
-  } else {
-    printf("Wrong date format.\nCorrect format is: YYYY-MM-DD - YYYY-MM-DD\n(add a space after the first date and before the second)\n");
-    return 0;
-  }
+  if(fgets(in, MY_CHAR_LEN, stdin)==EOF) printf("ERROR SCANF");
+  printf("%s\n", in);
 
 /*premparamos las fechas para el bind parameter*/
   while(in[i]!='\0'){
@@ -352,9 +339,9 @@ int query_orderRange(SQLHSTMT *stmt, FILE *out){
   /* Asigna la columna resultado a las variables  */
   ret=SQLBindCol(*stmt, 1, SQL_INTEGER, &ordernumber, (SQLLEN) sizeof(ordernumber), NULL);
   if(!SQL_SUCCEEDED(ret)) printf("ERROR SQLBINDCOL 1\n");
-  ret=SQLBindCol(*stmt, 2, SQL_DATE, (SQLDATE *)orderdate, (SQLLEN) sizeof(orderdate), NULL);
+  ret=SQLBindCol(*stmt, 2, SQL_DATE, &orderdate, (SQLLEN) sizeof(orderdate), NULL);
   if(!SQL_SUCCEEDED(ret)) printf("ERROR SQLBINDCOL 2\n");
-  ret=SQLBindCol(*stmt, 3, SQL_DATE, (SQLDATE *)shippeddate, (SQLLEN) sizeof(shippeddate), NULL);
+  ret=SQLBindCol(*stmt, 3, SQL_DATE, &shippeddate, (SQLLEN) sizeof(shippeddate), NULL);
   if(!SQL_SUCCEEDED(ret)) printf("ERROR SQLBINDCOL 3\n");
 
 
@@ -375,6 +362,7 @@ static void  query_orderRangeInterface(SQLHSTMT *stmt, SQLINTEGER *ordernumber, 
   char t[]="    | Order\t| Date  \t| Shipped\n";
 
   while(SQL_SUCCEEDED(ret = SQLFetch(*stmt))) {
+    s
     if(a==1){
       printf("\n%s", t);
       printf(  "----+-----------+-----------------------+-----------------------\n");
@@ -413,7 +401,7 @@ int query_orderDetails(SQLHSTMT *stmt, FILE *out){
   SQLDOUBLE price;
   SQLCHAR pcode[MY_CHAR_LEN], stat[MY_CHAR_LEN];
   SQLDATE orderdate;
-  int odn=0;
+  int odn;
   char query[]="o.ordernumber, o.orderdate, o.status, od.productcode, od.quantityordered, od.priceeach from orders o join orderdetails od on o.ordernumber = od.ordernumber where o.ordernumber = ? group by o.ordernumber, od.productcode, od.quantityordered, od.priceeach, od.orderlinenumber order by od.orderlinenumber";
 
   if(!stmt || !out) return 1;
