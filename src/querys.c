@@ -334,6 +334,9 @@ int query_orderRange(SQLHSTMT *stmt, FILE *out){
   ret=SQLBindParameter((*stmt), 2, SQL_PARAM_INPUT, SQL_C_CHAR, SQL_DATE, 10, 0, odd2, 0, NULL);
   if(!SQL_SUCCEEDED(ret)) printf("ERROR SQLBINDPARAMETER\n");
 
+  ret=SQLExecute(*stmt);
+  if(!SQL_SUCCEEDED(ret)) printf("ERROR SQLEXECUTE\n");
+
   /* Asigna la columna resultado a las variables  */
   ret=SQLBindCol(*stmt, 1, SQL_INTEGER, ordernumber, (SQLLEN) sizeof(ordernumber), NULL);
   if(!SQL_SUCCEEDED(ret)) printf("ERROR SQLBINDCOL 1\n");
@@ -416,6 +419,9 @@ int query_orderDetails(SQLHSTMT *stmt, FILE *out){
 
   ret=SQLBindParameter((*stmt), 1, SQL_PARAM_INPUT, SQL_C_SLONG, SQL_INTEGER, 0, 0, &odn, 0, NULL);
   if(!SQL_SUCCEEDED(ret)) printf("ERROR SQLBINDPARAMETER\n");
+
+  ret=SQLExecute(*stmt);
+  if(!SQL_SUCCEEDED(ret)) printf("ERROR SQLEXECUTE\n");
 
   /* Asignamos a cada columna de resultados una variable */
   ret=SQLBindCol(*stmt, 1, SQL_INTEGER, ordernumber, (SQLLEN) sizeof(ordernumber), NULL);
