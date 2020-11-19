@@ -272,8 +272,37 @@ int menus_products(SQLHSTMT *stmt, FILE *out){
 }
 
 int menus_orders(SQLHSTMT *stmt, FILE *out){
+  char c=' ';
+  int end=0;
+
   if(!out||!stmt) return 1;
-  menus_ordersPrint(out);
+  while(end==0){
+    if(c!='\n') menus_customersPrint(out);
+
+    menus_input(&c);
+
+
+    if(c=='1'){
+      if(menus_ordersOpen(stmt, out)!=0){
+         printf("\n > An error occurred while loading the products stock. < \n");
+      }
+    }else if(c=='2'){
+      if(menus_ordersRangend(stmt, out)!=0){
+         printf("\n > An error occurred while loading the products stock. < \n");
+      }
+    }else if(c=='3'){
+      if(menus_ordersDetail(stmt, out)!=0){
+         printf("\n > An error occurred while loading the products stock. < \n");
+      }
+    }else if(c=='4'){
+      end=1;
+      menus_exit(out);
+    }else if(c!='\n'){
+      menus_inputError(out);
+    }
+
+  }
+
   return 0;
 }
 
@@ -445,6 +474,6 @@ void menus_inputError(FILE *out){
 }
 
 void menus_changeScreen(FILE *out){
-  fprintf(out, "\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n");
+  fprintf(out, "\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n");
   return;
 }
