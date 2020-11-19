@@ -239,7 +239,7 @@ int query_orderOpen(SQLHSTMT *stmt, FILE *out){
   ret=SQLExecute(*stmt);
   if(!SQL_SUCCEEDED(ret)) printf("ERROR SQLEXECUTE\n");
 
-  /* Asigna la columna resultado a la variable y */
+  /* Asigna la columna resultado a la variable */
   ret=SQLBindCol(*stmt, 1, SQL_INT, ordernumber, (SQLLEN) sizeof(ordernumber), NULL);
   if(!SQL_SUCCEEDED(ret)) printf("ERROR SQLBINDCOL\n");
 
@@ -397,7 +397,8 @@ order by
 	od.orderlinenumber */
 int query_orderDetails(SQLHSTMT *stmt, FILE *out){
   SQLRETURN ret; /* ODBC API return status */
-  SQLINTEGER ordernumber, qord, price, sbt;
+  SQLINTEGER ordernumber, qord;
+  SQLNUMERIC price, sbt;
   SQLCHAR pcode[MY_CHAR_LEN], stat[MY_CHAR_LEN];
   SQLDATE orderdate;
   int odn=0;
@@ -407,7 +408,7 @@ int query_orderDetails(SQLHSTMT *stmt, FILE *out){
 
 
   if(fflush(out)!=0) printf("ERROR FFLUSH");
-  printf("Order number> ");
+  printf("Enter order number> ");
   if(scanf("%d", odn)==EOF) printf("ERROR SCANF");
   if(odn<1){
     printf("Order number given is not valid\n");
@@ -434,10 +435,12 @@ int query_orderDetails(SQLHSTMT *stmt, FILE *out){
   if(!SQL_SUCCEEDED(ret)) printf("ERROR SQLBINDCOL 3\n");
   ret=SQLBindCol(*stmt, 5, SQL_INTEGER, qord, (SQLLEN) sizeof(qord), NULL);
   if(!SQL_SUCCEEDED(ret)) printf("ERROR SQLBINDCOL 1\n");
-  ret=SQLBindCol(*stmt, 5, SQL_INTEGER, price, (SQLLEN) sizeof(price), NULL);
+  ret=SQLBindCol(*stmt, 5, SQL_NUMERIC, price, (SQLLEN) sizeof(price), NULL);
   if(!SQL_SUCCEEDED(ret)) printf("ERROR SQLBINDCOL 1\n");
-  ret=SQLBindCol(*stmt, 5, SQL_INTEGER, sbt, (SQLLEN) sizeof(sbt), NULL);
+  ret=SQLBindCol(*stmt, 5, SQL_NUMERIC, sbt, (SQLLEN) sizeof(sbt), NULL);
   if(!SQL_SUCCEEDED(ret)) printf("ERROR SQLBINDCOL 1\n");
+
+  query_orderDetailsInterface(stmt, &ordernumber, &orderdate, stat, pcode, &qord, &price, &sbt);
 
   ret=SQLCloseCursor(*stmt);
   if(!SQL_SUCCEEDED(ret)) printf("ERROR SQLCLOSECURSOR\n");
@@ -445,9 +448,46 @@ int query_orderDetails(SQLHSTMT *stmt, FILE *out){
   if(fflush(out)!=0) printf("ERROR FFLUSH");
 }
 
-static void  query_orderDetailsInterface(SQLHSTMT *stmt, SQLINTEGER *odnum, SQLDATE *oddate, SQLCHAR *st, SQLCHAR *pc, SQLINTEGER *q, SQLINTEGER *price, SQLINTEGER *sbt){
+static void query_orderDetailsInterface(SQLHSTMT *stmt, SQLINTEGER *odnum, SQLDATE *oddate, SQLCHAR *st, SQLCHAR *pc, SQLINTEGER *q, SQLINTEGER *price, SQLINTEGER *sbt){
+  int a=1;
+  double total=0;
+  SQLRETURN ret;
+  char t[]="    | Product Code\t| Quantity \t| Price per Unit\n"
 
+  /*Primero calculamos el total, sumando la columna subtotal*/
+  while(SQL_SUCCEEDED(ret = SQLFetch(*stmt))){
+    total += *((double *) sbt);
+    a++;
+  }
 
+  if(a==1){
+    printf("\n < No order with number %d >\n\n", *((int *) odnum));
+    return 0;
+  }
+
+  a=1;
+
+  while(SQL_SUCCEEDED(ret = SQLFetch(*stmt))) {
+    if(a==1){
+      printf("\nOrder Date: %s  --- Status: %s\n", (char *)oddate, (char *)st);
+      printf("\n%s", t);
+      printf(  "----+-----------------------+-----------------------+-----------------------\n");
+    }
+    if(a<10){
+      printf(" 0%d | %s\t| %d\t| %d\t\n", a,(char*) pc , *((int*) q), *((double *) price));
+    }else{
+      printf(" 0%d | %s\t| %d\t| %d\t\n", a,(char*) pc , *((int*) q), *((double *) price));
+    }
+    a++;
+    if((a%10)==0){
+      stop();
+      printf("\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n%s", t);
+      printf(  "----+-----------+-----------------------+-----------------------+---------------------\n");
+    }
+  }
+
+  printf("\n");
+  if(a==1) printf("\n < No order with number %d >\n\n", *((int *) odnum));
 }
 /*
  *  CUSTOMERS FIND
@@ -505,7 +545,6 @@ int query_customersFind(SQLHSTMT *stmt, FILE *out){
   return 0;
 }
 
-
 void query_customersFindInterface(SQLHSTMT *stmt, SQLCHAR *cnum, SQLCHAR *cname, SQLCHAR *cfn, SQLCHAR *csn, char *string){
   SQLRETURN ret;
   int a=1;
@@ -531,7 +570,7 @@ void query_customersFindInterface(SQLHSTMT *stmt, SQLCHAR *cnum, SQLCHAR *cname,
       }
   }
   printf("\n");
-  if(a==1) printf("\n < No product named \'%s\' >\n\n",string);
+  if(a==1) printf("\n < No customer named \'%s\' >\n\n",string);
 
   /*stop();*/
 
