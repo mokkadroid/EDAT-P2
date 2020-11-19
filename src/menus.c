@@ -179,6 +179,11 @@ static int menus_productsFind(SQLHSTMT *stmt, FILE *out);
 */
 int menus_customersFind(SQLHSTMT *stmt, FILE *out);
 
+/*Orders*/
+int menus_ordersOpen(SQLHSTMT *stmt, FILE *out);
+int menus_ordersRange(SQLHSTMT *stmt, FILE *out);
+int menus_ordersDetail(SQLHSTMT *stmt, FILE *out);
+
 /*************************************************************************/
 /************************** IMPLEMENTACIONES *****************************/
 /*************************************************************************/
@@ -277,7 +282,7 @@ int menus_orders(SQLHSTMT *stmt, FILE *out){
 
   if(!out||!stmt) return 1;
   while(end==0){
-    if(c!='\n') menus_customersPrint(out);
+    if(c!='\n') menus_ordersPrint(out);
 
     menus_input(&c);
 
@@ -287,7 +292,7 @@ int menus_orders(SQLHSTMT *stmt, FILE *out){
          printf("\n > An error occurred while loading the products stock. < \n");
       }
     }else if(c=='2'){
-      if(menus_ordersRangend(stmt, out)!=0){
+      if(menus_ordersRange(stmt, out)!=0){
          printf("\n > An error occurred while loading the products stock. < \n");
       }
     }else if(c=='3'){

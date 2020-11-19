@@ -61,7 +61,7 @@ static void query_productFindInterface(SQLHSTMT *stmt, SQLCHAR *pcode, SQLCHAR *
 */
 static void query_orderOpenInterface(SQLHSTMT *stmt, SQLINTEGER *onum);
 static void  query_orderRangeInterface(SQLHSTMT *stmt, SQLINTEGER *ordernumber, SQLDATE *orderdate, SQLDATE *shippeddate);
-static void query_orderDetailsInterface(SQLHSTMT *stmt, SQLINTEGER *odnum, SQLDATE *oddate, SQLCHAR *st, SQLCHAR *pc, SQLDOUBLE *q, SQLDOUBLE *price);
+static void query_orderDetailsInterface(SQLHSTMT *stmt, SQLINTEGER *odnum, SQLDATE *oddate, SQLCHAR *st, SQLCHAR *pc, SQLINTEGER *q, SQLDOUBLE *price);
 /**
 * query_customersFindInterface imprime el resultado de la query 'Find'
 *
@@ -414,7 +414,7 @@ int query_orderDetails(SQLHSTMT *stmt, FILE *out){
   SQLCHAR pcode[MY_CHAR_LEN], stat[MY_CHAR_LEN];
   SQLDATE orderdate;
   int odn=0;
-  char query[MY_CHAR_LEN]="o.ordernumber, o.orderdate, o.status, od.productcode, od.quantityordered, od.priceeach from orders o join orderdetails od on o.ordernumber = od.ordernumber where o.ordernumber = ? group by o.ordernumber, od.productcode, od.quantityordered, od.priceeach, od.orderlinenumber order by od.orderlinenumber";
+  char query[]="o.ordernumber, o.orderdate, o.status, od.productcode, od.quantityordered, od.priceeach from orders o join orderdetails od on o.ordernumber = od.ordernumber where o.ordernumber = ? group by o.ordernumber, od.productcode, od.quantityordered, od.priceeach, od.orderlinenumber order by od.orderlinenumber";
 
   if(!stmt || !out) return 1;
 
@@ -438,7 +438,7 @@ int query_orderDetails(SQLHSTMT *stmt, FILE *out){
   /* Asignamos a cada columna de resultados una variable */
   ret=SQLBindCol(*stmt, 1, SQL_INTEGER, &ordernumber, (SQLLEN) sizeof(ordernumber), NULL);
   if(!SQL_SUCCEEDED(ret)) printf("ERROR SQLBINDCOL 1\n");
-  ret=SQLBindCol(*stmt, 2, SQL_DATE, orderdate, (SQLLEN) sizeof(orderdate), NULL);
+  ret=SQLBindCol(*stmt, 2, SQL_DATE, &orderdate, (SQLLEN) sizeof(orderdate), NULL);
   if(!SQL_SUCCEEDED(ret)) printf("ERROR SQLBINDCOL 2\n");
   ret=SQLBindCol(*stmt, 3, SQL_CHAR, stat, (SQLLEN) sizeof(stat), NULL);
   if(!SQL_SUCCEEDED(ret)) printf("ERROR SQLBINDCOL 3\n");
@@ -458,7 +458,7 @@ int query_orderDetails(SQLHSTMT *stmt, FILE *out){
   if(fflush(out)!=0) printf("ERROR FFLUSH");
 }
 
-static void query_orderDetailsInterface(SQLHSTMT *stmt, SQLINTEGER *odnum, SQLDATE *oddate, SQLCHAR *st, SQLCHAR *pc, SQLDOUBLE *q, SQLDOUBLE *price){
+static void query_orderDetailsInterface(SQLHSTMT *stmt, SQLINTEGER *odnum, SQLDATE *oddate, SQLCHAR *st, SQLCHAR *pc, SQLINTEGER *q, SQLDOUBLE *price){
   int a=1;
   double total=0;
   SQLRETURN ret;
@@ -472,7 +472,7 @@ static void query_orderDetailsInterface(SQLHSTMT *stmt, SQLINTEGER *odnum, SQLDA
 
   if(a==1){
     printf("\n < No order with number %d >\n\n", *((int *) odnum));
-    return 0;
+    return;
   }
 
   a=1;
