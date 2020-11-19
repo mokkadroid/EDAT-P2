@@ -45,6 +45,7 @@ int query_orderRange(SQLHSTMT *stmt, FILE *out);
 
 int query_orderDetails(SQLHSTMT *stmt, FILE *out);
 
+int query_customersFind(SQLHSTMT *stmt, FILE *out);
 
 
 

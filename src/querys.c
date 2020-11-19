@@ -61,6 +61,7 @@ static void query_productFindInterface(SQLHSTMT *stmt, SQLCHAR *pcode, SQLCHAR *
 */
 static void query_orderOpenInterface(SQLHSTMT *stmt, SQLCHAR *onum);
 static void  query_orderRangeInterface(SQLHSTMT *stmt, SQLINTEGER ordernumber, SQLDATE orderdate, SQLDATE shippeddate);
+static void query_orderDetailsInterface(SQLHSTMT *stmt, SQLINTEGER *odnum, SQLDATE *oddate, SQLCHAR *st, SQLCHAR *pc, SQLINTEGER *q, SQLINTEGER *price, SQLINTEGER *sbt);
 /**
 * query_customersFindInterface imprime el resultado de la query 'Find'
 *
@@ -299,10 +300,10 @@ int query_orderRange(SQLHSTMT *stmt, FILE *out){
 
 
   if(fflush(out)!=0) printf("ERROR FFLUSH");
-  printf("Initial date: ");
+  printf("Initial date> ");
   if(scanf("%s", odd)==EOF) printf("ERROR SCANF");
   if(fflush(out)!=0) printf("ERROR FFLUSH");
-  printf("\nEnd date: ");
+  printf("\nEnd date> ");
   if(scanf("%s", odd2)==EOF) printf("ERROR SCANF");
 
   /*Sabemos que las fechas tienen el siguiente formato: YYYY-MM-DD, vamos a comprobar que sea así*/
@@ -408,7 +409,6 @@ int query_orderDetails(SQLHSTMT *stmt, FILE *out){
 
 
   if(fflush(out)!=0) printf("ERROR FFLUSH");
-  printf("Enter order number> ");
   if(scanf("%d", odn)==EOF) printf("ERROR SCANF");
   if(odn<1){
     printf("Order number given is not valid\n");

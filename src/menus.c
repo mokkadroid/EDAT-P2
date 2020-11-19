@@ -319,6 +319,7 @@ void menus_exit(FILE *out){
 /* Products options */
 int menus_productsStock(SQLHSTMT *stmt, FILE *out){
 
+  if(!stmt||!out) return 1;
   printf("\nEnter productcode > ");
   if(query_productStock(stmt, out)!=0) return 1;
 
@@ -327,6 +328,7 @@ int menus_productsStock(SQLHSTMT *stmt, FILE *out){
 
 int menus_productsFind(SQLHSTMT *stmt, FILE *out){
 
+  if(!stmt||!out) return 1;
   printf("\nEnter productname > ");
   if(query_productFind(stmt, out)!=0) return 1;
 
@@ -337,7 +339,7 @@ int menus_productsFind(SQLHSTMT *stmt, FILE *out){
 /* Orders options */
 int menus_ordersOpen(SQLHSTMT *stmt, FILE *out){
 
-
+  if(!stmt||!out) return 1;
   printf("\n");
   if(query_ordersOpen(stmt, out)!=0) return 1;
 
@@ -346,13 +348,16 @@ int menus_ordersOpen(SQLHSTMT *stmt, FILE *out){
 
 int menus_ordersRange(SQLHSTMT *stmt, FILE *out){
 
-  if(query_productFind(stmt, out)!=0) return 1;
+  if(!stmt||!out) return 1;
+  printf("\n");
+  if(query_orderRange(stmt, out)!=0) return 1;
 
   return 0;
 }
 
 int menus_ordersDetail(SQLHSTMT *stmt, FILE *out){
 
+  if(!stmt||!out) return 1;
   printf("\nEnter ordernumber > ");
   if(query_orderDetails(stmt, out)!=0) return 1;
 
