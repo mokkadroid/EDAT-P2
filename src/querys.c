@@ -265,7 +265,7 @@ static void query_orderOpenInterface(SQLHSTMT *stmt, SQLINTEGER *onum){
         printf("\n\t| Order number\t|\n");
         printf(  "--------+-----------------+\n");
       }
-      printf("   %d\t| %d\t|\n", a, (char*) onum);
+      printf("   %d\t| %d\t|\n", a, *((int*) onum));
       a++;
       if((a%10)==0){
 
@@ -344,7 +344,7 @@ int query_orderRange(SQLHSTMT *stmt, FILE *out){
 
 
   /* Interfaz */
-  query_orderRangeInterface(stmt, ordernumber, orderdate, shippeddate);
+  query_orderRangeInterface(stmt, &ordernumber, &orderdate, &shippeddate);
 
   ret=SQLCloseCursor(*stmt);
   if(!SQL_SUCCEEDED(ret)) printf("ERROR SQLCLOSECURSOR\n");
@@ -366,9 +366,9 @@ static void  query_orderRangeInterface(SQLHSTMT *stmt, SQLINTEGER *ordernumber, 
     }
 
     if(a<10)
-      printf(" 0%d | %s\t| %s\t| %s\t| %s\t\n", a, (int*) ordernumber, (char*) orderdate, (char*)shippeddate);
+      printf(" 0%d | %d\t| %s\t| %s\t| %s\t\n", a, *((int*) ordernumber), (char*) orderdate, (char*)shippeddate);
     else
-      printf(" %d | %s\t| %s\t| %s\t| %s\t\n", a, (int*) ordernumber, (char*) orderdate, (char*)shippeddate);
+      printf(" %d | %d\t| %s\t| %s\t| %s\t\n", a, *((int*) ordernumber), (char*) orderdate, (char*)shippeddate);
 
       a++;
       if((a%10)==0){
@@ -439,7 +439,10 @@ int query_orderDetails(SQLHSTMT *stmt, FILE *out){
   if(fflush(out)!=0) printf("ERROR FFLUSH");
 }
 
-static void  query_orderDetailsInterface(SQLHSTMT *stmt, SQLINTEGER *odnum, SQLDATE *oddate, SQLCHAR *st ){
+static void  query_orderDetailsInterface(SQLHSTMT *stmt, SQLINTEGER *odnum, SQLDATE *oddate, SQLCHAR *st, SQLCHAR *pc, SQLINTEGER *q, SQLINTEGER *price, SQLINTEGER *sbt){
+
+
+}
 /*
  *  CUSTOMERS FIND
  */
@@ -497,7 +500,7 @@ int query_customersFind(SQLHSTMT *stmt, FILE *out){
 }
 
 
-void query_customersFindInterface(SQLHSTMT *stmt, SQLCHAR *cnum, SQLCHAR *cname, SQLCHAR *cfn, SQLCHAR *csn,char *string){
+void query_customersFindInterface(SQLHSTMT *stmt, SQLCHAR *cnum, SQLCHAR *cname, SQLCHAR *cfn, SQLCHAR *csn, char *string){
   SQLRETURN ret;
   int a=1;
   char titulo[]="    | Number\t| Customer Name \t| Customer First Name\t| Customer Second Name\n";
