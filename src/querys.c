@@ -289,42 +289,48 @@ static void query_orderOpenInterface(SQLHSTMT *stmt, SQLINTEGER *onum){
 /*SELECT o.ordernumber, o.orderdate, o.shippeddate
 FROM  orders o
 WHERE o.orderdate >= '2003-01-01' AND o.orderdate <= '2004-01-01'
-ORDER BY o.ordernumber DESC*/
+ORDER BY o.ordernumber */
 int query_orderRange(SQLHSTMT *stmt, FILE *out){
   SQLRETURN ret; /* ODBC API return status */
   SQLINTEGER ordernumber;
   SQLDATE orderdate, shippeddate
-  char odd[MY_CHAR_LEN], odd2[MY_CHAR_LEN], query[MY_CHAR_LEN]="select o.ordernumber, o.orderdate, o.shippeddate from orders o where o.shippeddate >= ? and o.orderdate <= ? order by o.ordernumber desc";
+  int i=0, flag=1;
+  char odd[MY_CHAR_LEN], odd2[MY_CHAR_LEN], in[MY_CHAR_LEN];
+  char query[MY_CHAR_LEN]="select o.ordernumber, o.orderdate, o.shippeddate from orders o where o.shippeddate >= ? and o.orderdate <= ? order by o.ordernumber";
 
   if(!stmt || !out) return 1;
 
 
   if(fflush(out)!=0) printf("ERROR FFLUSH");
-  printf("Initial date> ");
-  if(scanf("%s", odd)==EOF) printf("ERROR SCANF");
-  if(fflush(out)!=0) printf("ERROR FFLUSH");
-  printf("\nEnd date> ");
-  if(scanf("%s", odd2)==EOF) printf("ERROR SCANF");
+  printf("Enter dates (YYYY-MM-DD - YYYY-MM-DD) > ");
+  if(scanf("%s", in)==EOF) printf("ERROR SCANF");
 
   /*Sabemos que las fechas tienen el siguiente formato: YYYY-MM-DD, vamos a comprobar que sea así*/
-  if((odd[4]=='-' && odd[7]=='-') && (odd2[4]=='-' && odd2[7]=='-') && odd[10]=='\0' && odd2[10]=='\0'){ /* Con la comprobacion de la posicion de los guiones y \0, vemos si el formato es correcto */
-    if(odd[5]>'1' || odd2[5]>'1'){ /* vemos que el mes sea correcto*/
+  if(in[4]=='-' && in[7]=='-' && in[11]=='-' && in[17]=='-' && in[20]=='-' && in[23]=='\0'){ /* Con la comprobacion de la posicion de los guiones y \0, vemos si el formato es correcto */
+    if(in[5]>'1' || in[18]>'1' || (in[5]=='1' && in[6]>'2') || (in[18]=='1' && in[19]>'2')){ /* vemos que el mes sea correcto*/
       printf("Error in MM, value over 12.\n");
       return 0;
     }
-    if((odd[5]=='1' && odd[6]>'2') || (odd2[5]=='1' && odd2[6]>'2')){
-      printf("Error in MM, value over 12.\n");
-      return 0;
-    }
-    if(odd[8]>'3' || odd2[8]>'3' || (odd[8]=='3' && odd[9]>'1') || (odd2[8]=='3' && odd2[9]>'1')){
+    if(in[8]>'3'|| in[21]>'3' || (in[8]=='3' && in[9]>'1') || (in[21]=='3' && in[22]>'1')){
       printf("Error in DD, value over 31.\n");
       return 0;
     }
   } else {
-    printf("Wrong date format\n");
+    printf("Wrong date format.\nCorrect format is: YYYY-MM-DD - YYYY-MM-DD\n(add a space after the first date and before the second)\n");
     return 0;
   }
 
+/*premparamos las fechas para el bind parameter*/
+  while(in[i]!='\0'){
+    if(in[i]!=' '){
+      odd[i]=in[i];
+    }
+    if(in[i]==' ') i+=3;
+    if(i>=13){
+      odd2[i]=in[i];
+    }
+    i++;
+  }
 
   ret=SQLPrepare((*stmt), (SQLCHAR*) query, SQL_NTS);
   if(!SQL_SUCCEEDED(ret)) printf("ERROR SQLPREPARE %d\n", ret);
@@ -452,7 +458,7 @@ static void query_orderDetailsInterface(SQLHSTMT *stmt, SQLINTEGER *odnum, SQLDA
   int a=1;
   double total=0;
   SQLRETURN ret;
-  char t[]="    | Product Code\t| Quantity \t| Price per Unit\n"
+  char t[]="    | Product Code\t| Quantity \t| Price per Unit\n";
 
   /*Primero calculamos el total, sumando la columna subtotal*/
   while(SQL_SUCCEEDED(ret = SQLFetch(*stmt))){
@@ -470,6 +476,7 @@ static void query_orderDetailsInterface(SQLHSTMT *stmt, SQLINTEGER *odnum, SQLDA
   while(SQL_SUCCEEDED(ret = SQLFetch(*stmt))) {
     if(a==1){
       printf("\nOrder Date: %s  --- Status: %s\n", (char *)oddate, (char *)st);
+      printf("Total sum = %lf\n", total);
       printf("\n%s", t);
       printf(  "----+-----------------------+-----------------------+-----------------------\n");
     }
