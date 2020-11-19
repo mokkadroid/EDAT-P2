@@ -341,7 +341,7 @@ int menus_ordersOpen(SQLHSTMT *stmt, FILE *out){
 
   if(!stmt||!out) return 1;
   printf("\n");
-  if(query_ordersOpen(stmt, out)!=0) return 1;
+  if(query_orderOpen(stmt, out)!=0) return 1;
 
   return 0;
 }
