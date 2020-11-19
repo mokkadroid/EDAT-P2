@@ -59,8 +59,8 @@ static void query_productFindInterface(SQLHSTMT *stmt, SQLCHAR *pcode, SQLCHAR *
 * @param stmt Puntero a SQLHSTMT
 * @param result Puntero a SQLCHAR donde se recibirá el resultado de la query
 */
-static void query_orderOpenInterface(SQLHSTMT *stmt, SQLCHAR *onum);
-static void  query_orderRangeInterface(SQLHSTMT *stmt, SQLINTEGER ordernumber, SQLDATE orderdate, SQLDATE shippeddate);
+static void query_orderOpenInterface(SQLHSTMT *stmt, SQLINTEGER *onum);
+static void  query_orderRangeInterface(SQLHSTMT *stmt, SQLINTEGER *ordernumber, SQLDATE *orderdate, SQLDATE *shippeddate);
 static void query_orderDetailsInterface(SQLHSTMT *stmt, SQLINTEGER *odnum, SQLDATE *oddate, SQLCHAR *st, SQLCHAR *pc, SQLINTEGER *q, SQLINTEGER *price, SQLINTEGER *sbt);
 /**
 * query_customersFindInterface imprime el resultado de la query 'Find'
@@ -241,7 +241,7 @@ int query_orderOpen(SQLHSTMT *stmt, FILE *out){
   if(!SQL_SUCCEEDED(ret)) printf("ERROR SQLEXECUTE\n");
 
   /* Asigna la columna resultado a la variable */
-  ret=SQLBindCol(*stmt, 1, SQL_INT, ordernumber, (SQLLEN) sizeof(ordernumber), NULL);
+  ret=SQLBindCol(*stmt, 1, SQL_INTEGER, &ordernumber, (SQLLEN) sizeof(ordernumber), NULL);
   if(!SQL_SUCCEEDED(ret)) printf("ERROR SQLBINDCOL\n");
 
 
@@ -259,6 +259,7 @@ int query_orderOpen(SQLHSTMT *stmt, FILE *out){
 /* Interfaz */
 static void query_orderOpenInterface(SQLHSTMT *stmt, SQLINTEGER *onum){
   int a=1;
+  SQLRETURN ret;
 
   while(SQL_SUCCEEDED(ret = SQLFetch(*stmt))) {
 
@@ -293,8 +294,8 @@ ORDER BY o.ordernumber */
 int query_orderRange(SQLHSTMT *stmt, FILE *out){
   SQLRETURN ret; /* ODBC API return status */
   SQLINTEGER ordernumber;
-  SQLDATE orderdate, shippeddate
-  int i=0, flag=1;
+  SQLDATE orderdate, shippeddate;
+  int i=0, k=0;
   char odd[MY_CHAR_LEN], odd2[MY_CHAR_LEN], in[MY_CHAR_LEN];
   char query[MY_CHAR_LEN]="select o.ordernumber, o.orderdate, o.shippeddate from orders o where o.shippeddate >= ? and o.orderdate <= ? order by o.ordernumber";
 
@@ -325,12 +326,17 @@ int query_orderRange(SQLHSTMT *stmt, FILE *out){
     if(in[i]!=' '){
       odd[i]=in[i];
     }
-    if(in[i]==' ') i+=3;
+    if(in[i]==' '){
+      odd[i]='\0';
+      i+=3;
+    }
     if(i>=13){
-      odd2[i]=in[i];
+      odd2[k]=in[i];
+      k++;
     }
     i++;
   }
+  odd2[k]='\0';
 
   ret=SQLPrepare((*stmt), (SQLCHAR*) query, SQL_NTS);
   if(!SQL_SUCCEEDED(ret)) printf("ERROR SQLPREPARE %d\n", ret);
@@ -345,7 +351,7 @@ int query_orderRange(SQLHSTMT *stmt, FILE *out){
   if(!SQL_SUCCEEDED(ret)) printf("ERROR SQLEXECUTE\n");
 
   /* Asigna la columna resultado a las variables  */
-  ret=SQLBindCol(*stmt, 1, SQL_INTEGER, ordernumber, (SQLLEN) sizeof(ordernumber), NULL);
+  ret=SQLBindCol(*stmt, 1, SQL_INTEGER, &ordernumber, (SQLLEN) sizeof(ordernumber), NULL);
   if(!SQL_SUCCEEDED(ret)) printf("ERROR SQLBINDCOL 1\n");
   ret=SQLBindCol(*stmt, 2, SQL_DATE, orderdate, (SQLLEN) sizeof(orderdate), NULL);
   if(!SQL_SUCCEEDED(ret)) printf("ERROR SQLBINDCOL 2\n");
@@ -367,7 +373,7 @@ int query_orderRange(SQLHSTMT *stmt, FILE *out){
 static void  query_orderRangeInterface(SQLHSTMT *stmt, SQLINTEGER *ordernumber, SQLDATE *orderdate, SQLDATE *shippeddate){
   int a=1;
   SQLRETURN ret;
-  char t[]="    | Order\t| Date  \t| Shipped\n"
+  char t[]="    | Order\t| Date  \t| Shipped\n";
 
   while(SQL_SUCCEEDED(ret = SQLFetch(*stmt))) {
     if(a==1){
@@ -405,17 +411,17 @@ order by
 int query_orderDetails(SQLHSTMT *stmt, FILE *out){
   SQLRETURN ret; /* ODBC API return status */
   SQLINTEGER ordernumber, qord;
-  SQLNUMERIC price, sbt;
+  SQLDOUBLE price;
   SQLCHAR pcode[MY_CHAR_LEN], stat[MY_CHAR_LEN];
   SQLDATE orderdate;
   int odn=0;
-  char query[MY_CHAR_LEN]="o.ordernumber, o.orderdate, o.status, od.productcode, od.quantityordered, od.priceeach, od.quantityordered * od.priceeach as subtotal from orders o join orderdetails od on o.ordernumber = od.ordernumber where o.ordernumber = ? group by o.ordernumber, od.productcode, od.quantityordered, od.priceeach, od.orderlinenumber order by od.orderlinenumber";
+  char query[MY_CHAR_LEN]="o.ordernumber, o.orderdate, o.status, od.productcode, od.quantityordered, od.priceeach from orders o join orderdetails od on o.ordernumber = od.ordernumber where o.ordernumber = ? group by o.ordernumber, od.productcode, od.quantityordered, od.priceeach, od.orderlinenumber order by od.orderlinenumber";
 
   if(!stmt || !out) return 1;
 
 
   if(fflush(out)!=0) printf("ERROR FFLUSH");
-  if(scanf("%d", odn)==EOF) printf("ERROR SCANF");
+  if(scanf("%d", &odn)==EOF) printf("ERROR SCANF");
   if(odn<1){
     printf("Order number given is not valid\n");
     return 0;
@@ -439,12 +445,11 @@ int query_orderDetails(SQLHSTMT *stmt, FILE *out){
   if(!SQL_SUCCEEDED(ret)) printf("ERROR SQLBINDCOL 3\n");
   ret=SQLBindCol(*stmt, 4, SQL_CHAR, pcode, (SQLLEN) sizeof(pcode), NULL);
   if(!SQL_SUCCEEDED(ret)) printf("ERROR SQLBINDCOL 3\n");
-  ret=SQLBindCol(*stmt, 5, SQL_INTEGER, qord, (SQLLEN) sizeof(qord), NULL);
+  ret=SQLBindCol(*stmt, 5, SQL_INTEGER, &qord, (SQLLEN) sizeof(qord), NULL);
   if(!SQL_SUCCEEDED(ret)) printf("ERROR SQLBINDCOL 1\n");
-  ret=SQLBindCol(*stmt, 5, SQL_NUMERIC, price, (SQLLEN) sizeof(price), NULL);
+  ret=SQLBindCol(*stmt, 6, SQL_DOUBLE, &price, (SQLLEN) sizeof(price), NULL);
   if(!SQL_SUCCEEDED(ret)) printf("ERROR SQLBINDCOL 1\n");
-  ret=SQLBindCol(*stmt, 5, SQL_NUMERIC, sbt, (SQLLEN) sizeof(sbt), NULL);
-  if(!SQL_SUCCEEDED(ret)) printf("ERROR SQLBINDCOL 1\n");
+
 
   query_orderDetailsInterface(stmt, &ordernumber, &orderdate, stat, pcode, &qord, &price, &sbt);
 
@@ -481,9 +486,9 @@ static void query_orderDetailsInterface(SQLHSTMT *stmt, SQLINTEGER *odnum, SQLDA
       printf(  "----+-----------------------+-----------------------+-----------------------\n");
     }
     if(a<10){
-      printf(" 0%d | %s\t| %d\t| %d\t\n", a,(char*) pc , *((int*) q), *((double *) price));
+      printf(" 0%d | %s\t| %lf\t| %lf\t\n", a,(char*) pc , *((int*) q), *((double *) price));
     }else{
-      printf(" 0%d | %s\t| %d\t| %d\t\n", a,(char*) pc , *((int*) q), *((double *) price));
+      printf(" 0%d | %s\t| %lf\t| %lf\t\n", a,(char*) pc , *((int*) q), *((double *) price));
     }
     a++;
     if((a%10)==0){
