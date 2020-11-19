@@ -121,7 +121,6 @@ int query_productStock(SQLHSTMT *stmt, FILE *out){
   return 0;
 }
 
-
 void query_productStockInterface(SQLHSTMT *stmt, SQLINTEGER *result, SQLCHAR *productcode){
   SQLRETURN ret;
 
@@ -135,8 +134,6 @@ void query_productStockInterface(SQLHSTMT *stmt, SQLINTEGER *result, SQLCHAR *pr
 
   return;
 }
-
-
 /*
  *  PRODUCT FIND
  */
@@ -186,7 +183,6 @@ int query_productFind(SQLHSTMT *stmt, FILE *out){
   return 0;
 }
 
-
 void query_productFindInterface(SQLHSTMT *stmt, SQLCHAR *pcode, SQLCHAR *pname, char *string){
   SQLRETURN ret;
   int a=1;
@@ -227,7 +223,7 @@ void query_productFindInterface(SQLHSTMT *stmt, SQLCHAR *pcode, SQLCHAR *pname, 
 
 int query_orderOpen(SQLHSTMT *stmt, FILE *out){
   SQLRETURN ret; /* ODBC API return status */
-  SQLINTEGER ordernumber[MY_CHAR_LEN];
+  SQLINTEGER ordernumber;
   char query[MY_CHAR_LEN]="select o.ordernumber from orders o where o.shippeddate isnull order by o.ordernumber";
 
 
@@ -249,7 +245,7 @@ int query_orderOpen(SQLHSTMT *stmt, FILE *out){
 
 
   /* Interfaz */
-  query_orderOpenInterface(stmt, ordernumber);
+  query_orderOpenInterface(stmt, &ordernumber);
 
   ret=SQLCloseCursor(*stmt);
   if(!SQL_SUCCEEDED(ret)) printf("ERROR SQLCLOSECURSOR\n");
@@ -260,14 +256,16 @@ int query_orderOpen(SQLHSTMT *stmt, FILE *out){
 }
 
 /* Interfaz */
-static void query_orderOpenInterface(SQLHSTMT *stmt, SQLCHAR *onum){
+static void query_orderOpenInterface(SQLHSTMT *stmt, SQLINTEGER *onum){
   int a=1;
 
-  printf("\n\t| Order number\t|\n");
-  printf(  "--------+-----------------+\n");
-
   while(SQL_SUCCEEDED(ret = SQLFetch(*stmt))) {
-      printf("   %d\t| %s\t|\n", a, (char*) onum);
+
+      if(a==1){
+        printf("\n\t| Order number\t|\n");
+        printf(  "--------+-----------------+\n");
+      }
+      printf("   %d\t| %d\t|\n", a, (char*) onum);
       a++;
       if((a%10)==0){
 
@@ -336,7 +334,7 @@ int query_orderRange(SQLHSTMT *stmt, FILE *out){
   ret=SQLBindParameter((*stmt), 2, SQL_PARAM_INPUT, SQL_C_CHAR, SQL_DATE, 10, 0, odd2, 0, NULL);
   if(!SQL_SUCCEEDED(ret)) printf("ERROR SQLBINDPARAMETER\n");
 
-  /* Asigna la columna resultado a la variable  */
+  /* Asigna la columna resultado a las variables  */
   ret=SQLBindCol(*stmt, 1, SQL_INTEGER, ordernumber, (SQLLEN) sizeof(ordernumber), NULL);
   if(!SQL_SUCCEEDED(ret)) printf("ERROR SQLBINDCOL 1\n");
   ret=SQLBindCol(*stmt, 2, SQL_DATE, orderdate, (SQLLEN) sizeof(orderdate), NULL);
@@ -381,14 +379,57 @@ static void  query_orderRangeInterface(SQLHSTMT *stmt, SQLINTEGER *ordernumber, 
       }
   }
 }
+/*
+ *  ORDER DETAILS
+ */
+/*select
+	o.ordernumber, o.orderdate, o.status, od.productcode, od.quantityordered, od.priceeach, od.quantityordered * od.priceeach as subtotal
+from
+	orders o join orderdetails od on o.ordernumber = od.ordernumber
+where
+	o.ordernumber = ?
+group by
+	o.ordernumber, od.productcode, od.quantityordered, od.priceeach, od.orderlinenumber
+order by
+	od.orderlinenumber */
+int query_orderDetails(SQLHSTMT *stmt, FILE *out){
+  SQLRETURN ret; /* ODBC API return status */
+  SQLINTEGER ordernumber, qord, price, sbt;
+  SQLCHAR pcode, stat;
+  SQLDATE orderdate;
+  int odn=0;
+  char query[MY_CHAR_LEN]="o.ordernumber, o.orderdate, o.status, od.productcode, od.quantityordered, od.priceeach, od.quantityordered * od.priceeach as subtotal from orders o join orderdetails od on o.ordernumber = od.ordernumber where o.ordernumber = ? group by o.ordernumber, od.productcode, od.quantityordered, od.priceeach, od.orderlinenumber order by od.orderlinenumber";
 
-int query_orderDetails(SQLHSTMT *stmt, FILE *out){}
+  if(!stmt || !out) return 1;
 
 
+  if(fflush(out)!=0) printf("ERROR FFLUSH");
+  printf("Order number> ");
+  if(scanf("%d", odn)==EOF) printf("ERROR SCANF");
+  if(odn<1){
+    printf("Order number given is not valid\n");
+    return 0;
+  }
 
+  ret=SQLPrepare((*stmt), (SQLCHAR*) query, SQL_NTS);
+  if(!SQL_SUCCEEDED(ret)) printf("ERROR SQLPREPARE %d\n", ret);
 
+  ret=SQLBindParameter((*stmt), 1, SQL_PARAM_INPUT, SQL_C_SLONG, SQL_INTEGER, 0, 0, &odn, 0, NULL);
+  if(!SQL_SUCCEEDED(ret)) printf("ERROR SQLBINDPARAMETER\n");
 
+  /* Asignamos a cada columna de resultados una variable */
+  ret=SQLBindCol(*stmt, 1, SQL_INTEGER, ordernumber, (SQLLEN) sizeof(ordernumber), NULL);
+  if(!SQL_SUCCEEDED(ret)) printf("ERROR SQLBINDCOL 1\n");
+  ret=SQLBindCol(*stmt, 2, SQL_DATE, orderdate, (SQLLEN) sizeof(orderdate), NULL);
+  if(!SQL_SUCCEEDED(ret)) printf("ERROR SQLBINDCOL 2\n");
+  ret=SQLBindCol(*stmt, 3, SQL_CHAR, stat, (SQLLEN) sizeof(stat), NULL);
+  if(!SQL_SUCCEEDED(ret)) printf("ERROR SQLBINDCOL 3\n");
+  ret=SQLBindCol(*stmt, 4, SQL_CHAR, pcode, (SQLLEN) sizeof(pcode), NULL);
+  if(!SQL_SUCCEEDED(ret)) printf("ERROR SQLBINDCOL 3\n");
+  ret=SQLBindCol(*stmt, 5, SQL_INTEGER, qord, (SQLLEN) sizeof(qord), NULL);
+  if(!SQL_SUCCEEDED(ret)) printf("ERROR SQLBINDCOL 1\n");
 
+}
 /*
  *  CUSTOMERS FIND
  */
