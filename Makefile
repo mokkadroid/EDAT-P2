@@ -83,7 +83,35 @@ $(OBJ)/odbc.o: $(SRC)/odbc.c $(INC)/odbc.h
 
 
 
+permisions:
+	chmod +x *.sh
 
+test: compile permisions
+	./products_stock.sh
+	./products_find.sh
+	./orders_open.sh
+	./orders_range.sh
+	./orders_detail.sh
+	./customers_find.sh
+	./customers_list_products.sh
+	./customers_balance.sh
+
+
+
+
+##
+## Para Generar el fichero splint.log, ejecutar las tres secuencialmente
+##
+extract:
+	mv ./src/*.c ./
+	mv ./include/*.h ./
+
+splint:
+	splint -nullpass *.c *.h > splint.log
+
+insert:
+	mv ./*.c ./src/
+	mv ./*.h ./include/
 
 
 

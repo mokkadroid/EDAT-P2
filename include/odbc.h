@@ -8,8 +8,6 @@
 #define CONNECTION_PARS "driver={PostgreSQL ANSI};uid=alumnodb;" \
         "pwd=alumnodb;server=localhost;database=classicmodels"
 
-/* report most recient error */
-void odbc_extract_error(char *fn, SQLHANDLE handle, SQLSMALLINT type);
 
 /* STANDARD CONNECTION PROCEDURE */
 int odbc_connect(SQLHENV* env, SQLHDBC* dbc);

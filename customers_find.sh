@@ -14,11 +14,14 @@ expect "Enter customer name > "
 send -- "Mary\r"
 
 # 7933 -> stock for product with id = S10_1678
-expect "146 Saveley & Henriot, Co. Mary  Saveley"
-expect "219 Boards & Toys Co. Mary Young"
+expect "146    | Saveley & Henriot, Co.	| Mary 	| Saveley"
+expect "219    | Boards & Toys Co.	| Mary	| Young"
 
+send -- "q\r"
 
 puts "\n--------------------------------OK\n"
+
+
 
 expect "Enter a number that corresponds to your choice > "
 send -- "4\r"
