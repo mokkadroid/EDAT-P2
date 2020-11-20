@@ -264,18 +264,18 @@ static void query_orderOpenInterface(SQLHSTMT *stmt, SQLINTEGER *onum){
   while(SQL_SUCCEEDED(ret = SQLFetch(*stmt))) {
 
       if(a==1){
-        printf("\n\t| Order number\n");
-        printf(  "--------+---------------\n");
+        printf("| Order number\n");
+        printf("+---------------\n");
       }
-      printf("   %d\t| %d\t|\n", a, *((int*) onum));
+      printf(" %d\n", *((int*) onum));
       a++;
-      if((a%10)==0){
+      /*if((a%10)==0){
 
         stop();
         printf("\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\t| Order number\t|\n");
         printf(  "--------+-----------------\n");
         printf("   %d\t| %d\n", a, *((int*) onum));
-      }
+      }*/
   }
   printf("\n");
   if(a==1) printf("\n < All the orders have been shipped >\n\n");
