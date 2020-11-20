@@ -264,10 +264,15 @@ static void query_orderOpenInterface(SQLHSTMT *stmt, SQLINTEGER *onum){
   while(SQL_SUCCEEDED(ret = SQLFetch(*stmt))) {
 
       if(a==1){
-        printf("| Order number\n");
-        printf("+---------------\n");
+        printf("   | Order number\n");
+        printf("---+---------------\n");
       }
-      printf(" %d\n", *((int*) onum));
+      if(a<10){
+        printf("0%d | %d\n", a, *((int*) onum));
+      } else {
+        printf("%d | %d\n", a, *((int*) onum));
+      }
+
       a++;
       /*if((a%10)==0){
 
