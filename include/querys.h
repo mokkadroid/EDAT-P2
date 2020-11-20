@@ -47,6 +47,11 @@ int query_orderDetails(SQLHSTMT *stmt, FILE *out);
 
 int query_customersFind(SQLHSTMT *stmt, FILE *out);
 
+int query_customersListProducts(SQLHSTMT *stmt, FILE *out);
+
+int query_customersBalance(SQLHSTMT *stmt, FILE *out);
+
+
 
 
 #endif
